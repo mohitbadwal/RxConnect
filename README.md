@@ -12,7 +12,7 @@ Make new <b>RxConnect</b> object
 RxConnect rxConnect=new RxConnect(context);
 ```
 
-  Set Parameter of JSON
+  Set Parameter to send
 
   ```java
 rxConnect.setParam("phone","9999999999");
