@@ -1,28 +1,31 @@
-# RxJSONPost
-An Android Library to POST JSON using Rxjava.
+# RxConnect
+An Android Library to POST JSON and normal GET/POST using Rxjava.
 
 Add this line to your <b>dependencies</b> in your apps <b>build.gradle</b>
 
-<code>compile 'mohitbadwal.rxjsonpost:rxjsonpost:1.0'</code>
+<code>compile 'mohitbadwal.rxconnect:rxconnect:1.1'</code>
 
 # Usage
-Make new <b>JSONPost</b> object
+Make new <b>RxConnect</b> object
 
 ```java  
-JSONPost jsonPost=new JSONPost();
+RxConnect rxConnect=new RxConnect(context);
 ```
 
   Set Parameter of JSON
 
   ```java
-jsonPost.setParam("phone","9999999999");
-// set json key and value (necessary)
-jsonPost.setParam("password","enteredpassword");
+rxConnect.setParam("phone","9999999999");
+// setParam(keys,values)
+rxConnect.setParam("password","enteredpassword");
   ```
   Use <b>execute</b> method to perform operation
 ```java
       //all override methods run on ui thread
-        jsonPost.execute(yoururl,context, new JSONPost.JSONResultHelper() {
+      //use RxConnect.GET for GET
+      //use RxConnect.POST for POST
+      //use RxConnect.JSON_POST for POST JSON data
+        rxConnect.execute(yoururl,RxConnect.GET, new RxConnect.RxResultHelper() {
             @Override
             public void onResult(String result) {
               //do something on result
