@@ -20,11 +20,11 @@ public class MainActivity extends AppCompatActivity {
         rxConnect=new RxConnect(MainActivity.this);
 
         rxConnect.setParam("phone","9999999999");
-        // set json key and value (necessary)
+        // set  key and value (necessary)
         rxConnect.setParam("password","enteredpassword");
 
        //all override methods run on ui thread
-        rxConnect.execute(url,RxConnect.GET, new RxConnect.RxResultHelper() {
+        rxConnect.execute(url,RxConnect.POST, new RxConnect.RxResultHelper() {
             @Override
             public void onResult(String result) {
                 Log.d("result here",result);
