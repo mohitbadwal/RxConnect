@@ -101,6 +101,78 @@ public class RxConnect {
         observable.subscribeOn(Schedulers.newThread())
                 .subscribe(subscriber);
     }
+    public void executeNoParam(final String url,final RxResultHelper RxResultHelper)
+    {
+        Observable<String> observable= AsyncSubject.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                String s= null;
+                try {
+                    s=getLinkContent(url);
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+                subscriber.onNext(s);
+                subscriber.onCompleted();
+            }
+        });
+        Subscriber<String> subscriber=new Subscriber<String>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(final Throwable e) {
+                context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RxResultHelper.onError(e);
+                    }
+                });
+
+            }
+
+            @Override
+            public void onNext(final String s) {
+                context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!s.contentEquals("Empty Stream"))
+                            RxResultHelper.onResult(s);
+                        else
+                            RxResultHelper.onNoResult();
+                    }
+                });
+            }
+        };
+        observable.subscribeOn(Schedulers.newThread())
+                .subscribe(subscriber);
+    }
+    private String getLinkContent(String url) throws Exception {
+        InputStream inputStream = null;
+        String result = "";
+
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        url += "?";
+        HttpGet httpGet = new HttpGet(url);
+
+        HttpResponse httpResponse = httpClient.execute(httpGet);
+        HttpEntity httpEntity = httpResponse.getEntity();
+        inputStream = httpEntity.getContent();
+        if(inputStream != null)
+            result = streamConverter(inputStream);
+        else
+            result = "Empty Stream";
+
+
+
+        return result;
+
+
+
+
+    }
     private String normalGET(String url) throws Exception {
         InputStream inputStream = null;
         String result = "";
