@@ -74,7 +74,7 @@ public class RxConnect {
                         }
                         else if (method==3)
                         {
-                            s=normalPOST(url);
+                            s=normalGET(url);
                         }
                         else
                         {
