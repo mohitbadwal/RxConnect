@@ -40,10 +40,22 @@ public class RxConnect {
     public static final String JSON_POST="1";
     public static final String POST="2";
     public static final String GET="3";
+    private boolean CACHING_ENABLED=true;
+    private String helper="";
     public void setParam(String subject,String answer)
     {
         this.subject.add(subject);
        this.answer.add(answer);
+        if (isCachingEnabled())
+        helper=helper+subject+answer;
+    }
+    public boolean isCachingEnabled()
+    {
+        return CACHING_ENABLED;
+    }
+    public void setCachingEnabled(Boolean cachingEnabled)
+    {
+        CACHING_ENABLED=cachingEnabled;
     }
     public void execute(final String url, final String method, final RxResultHelper RxResultHelper)
     {
@@ -51,15 +63,63 @@ public class RxConnect {
             @Override
             public void call(Subscriber<? super String> subscriber) {
                 String s= null;
+                String newHelper="";
+                String cachedResult="";
                 try {
-                    if(method.contentEquals("1"))
-                    s = POST(url);
-                    else if (method.contentEquals("2"))
-                        s=normalPOST(url);
-                    else if (method.contentEquals("3"))
-                        s=normalGET(url);
-                    else {
-                        throw new ParamsException();
+                    if(isCachingEnabled()) {
+
+                        if (method.contentEquals("1")) {
+                            newHelper=url+helper+"jsonpost";
+                            cachedResult=resultCache.getResultCache(newHelper);
+                          if(cachedResult==null) {
+                              s = POST(url);
+                              resultCache.putResultToCache(newHelper,s);
+                          }
+                            else {
+                              s = cachedResult;
+                              resultCache.removeCachePut(newHelper,POST(url));
+                          }
+                        }
+                        else if (method.contentEquals("2")) {
+                            newHelper=url+helper+"post";
+                            cachedResult=resultCache.getResultCache(newHelper);
+                            if(cachedResult==null) {
+                                s = normalPOST(url);
+                                resultCache.putResultToCache(newHelper ,s);
+                            }
+                            else {
+                                s = cachedResult;
+                                resultCache.removeCachePut(newHelper,normalPOST(url));
+                            }
+                        }
+                        else if (method.contentEquals("3")) {
+                            newHelper=url+helper+"get";
+                            cachedResult=resultCache.getResultCache(newHelper);
+                            if(cachedResult==null) {
+                                s = normalGET(url);
+                                resultCache.putResultToCache(newHelper,s);
+                            }
+                            else  {
+                                s = cachedResult;
+                                resultCache.removeCachePut(newHelper,normalGET(url));
+                            }
+                        }
+                        else {
+                            throw new ParamsException();
+                        }
+                    }
+                    else
+                    {
+                        if(method.contentEquals("1"))
+                            s = POST(url);
+                        else if (method.contentEquals("2"))
+                            s=normalPOST(url);
+                        else if (method.contentEquals("3"))
+                            s=normalGET(url);
+                        else {
+                            throw new ParamsException();
+                        }
+
                     }
                 } catch (Exception e) {
                     subscriber.onError(e);
@@ -101,14 +161,25 @@ public class RxConnect {
         observable.subscribeOn(Schedulers.newThread())
                 .subscribe(subscriber);
     }
+
     public void executeNoParam(final String url,final RxResultHelper RxResultHelper)
     {
         Observable<String> observable= AsyncSubject.create(new Observable.OnSubscribe<String>() {
             @Override
             public void call(Subscriber<? super String> subscriber) {
                 String s= null;
-                try {
-                    s=getLinkContent(url);
+                try {   if (isCachingEnabled()) {
+                    if (resultCache.getResultCache(url) == null) {
+                        s = getLinkContent(url);
+                        resultCache.putResultToCache(url, s);
+                    } else {
+                        s = resultCache.getResultCache(url);
+                            resultCache.removeCachePut(url,getLinkContent(url));
+                    }
+                }
+                    else {
+                    s = getLinkContent(url);
+                }
                 } catch (Exception e) {
                     subscriber.onError(e);
                 }
@@ -175,6 +246,7 @@ public class RxConnect {
     }
     private String normalGET(String url) throws Exception {
         InputStream inputStream = null;
+
         String result = "";
         if(!(subject.size()>0))
         {
@@ -213,6 +285,7 @@ public class RxConnect {
     private String normalPOST(String url) throws Exception {
         InputStream inputStream = null;
         String result = "";
+
         if(!(subject.size()>0))
         {
             throw new ParamsException();
@@ -263,6 +336,7 @@ public class RxConnect {
 
                 jsonObject.accumulate(subject.get(i), answer.get(i));
 
+
             }
 
             json = jsonObject.toString();
@@ -298,11 +372,12 @@ public class RxConnect {
         return result;
 
     }
-
+    ResultCache resultCache;
     public RxConnect(Activity context)
     {   this.context=context;
         subject=new ArrayList<>();
         answer=new ArrayList<>();
+        resultCache=new ResultCache();
     }
 public interface RxResultHelper
 {
