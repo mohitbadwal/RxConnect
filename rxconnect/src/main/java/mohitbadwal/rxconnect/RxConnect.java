@@ -57,6 +57,58 @@ public class RxConnect {
     {
         CACHING_ENABLED=cachingEnabled;
     }
+    private void tempExecutor(final String newHelper1, final String url, final int method)
+    {
+        final Observable<String> observable=AsyncSubject.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                String s = null;
+                    try {
+                        if(method==1)
+                        {
+                            s=POST(url);
+                        }
+                        else if (method==2)
+                        {
+                            s=normalPOST(url);
+                        }
+                        else if (method==3)
+                        {
+                            s=normalPOST(url);
+                        }
+                        else
+                        {
+                            s=getLinkContent(url);
+                        }
+                    } catch (Exception e) {
+                        subscriber.onError(e);
+                    }
+                subscriber.onNext(s);
+                subscriber.onCompleted();
+
+
+            }
+        });
+        final Subscriber<String> subscriber=new Subscriber<String>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(final Throwable e) {
+
+
+            }
+
+            @Override
+            public void onNext(final String s) {
+                resultCache.removeCachePut(newHelper1,s);
+            }
+        };
+        observable.subscribeOn(Schedulers.newThread())
+                .subscribe(subscriber);
+    }
     public void execute(final String url, final String method, final RxResultHelper RxResultHelper)
     {
         Observable<String> observable= AsyncSubject.create(new Observable.OnSubscribe<String>() {
@@ -77,7 +129,7 @@ public class RxConnect {
                           }
                             else {
                               s = cachedResult;
-                              resultCache.removeCachePut(newHelper,POST(url));
+                              tempExecutor(newHelper,url,1);
                           }
                         }
                         else if (method.contentEquals("2")) {
@@ -89,7 +141,7 @@ public class RxConnect {
                             }
                             else {
                                 s = cachedResult;
-                                resultCache.removeCachePut(newHelper,normalPOST(url));
+                                tempExecutor(newHelper,url,2);
                             }
                         }
                         else if (method.contentEquals("3")) {
@@ -101,7 +153,7 @@ public class RxConnect {
                             }
                             else  {
                                 s = cachedResult;
-                                resultCache.removeCachePut(newHelper,normalGET(url));
+                                tempExecutor(newHelper,url,3);
                             }
                         }
                         else {
@@ -174,7 +226,7 @@ public class RxConnect {
                         resultCache.putResultToCache(url, s);
                     } else {
                         s = resultCache.getResultCache(url);
-                            resultCache.removeCachePut(url,getLinkContent(url));
+                        tempExecutor(url,url,0);
                     }
                 }
                     else {
