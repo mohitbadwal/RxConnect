@@ -16,6 +16,7 @@ RxConnect rxConnect=new RxConnect(context);
 //by default caching is enabled for better performance
 rxConnect.setCachingEnabled(false);
 //call this method before setting parameters if you don't want caching
+```
   Set Parameter to send
 
   ```java
