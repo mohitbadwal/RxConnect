@@ -98,7 +98,7 @@ public class RxConnect {
             @Override
             public void onError(final Throwable e) {
 
-
+                e.printStackTrace();
             }
 
             @Override
