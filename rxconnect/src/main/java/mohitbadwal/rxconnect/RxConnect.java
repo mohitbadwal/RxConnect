@@ -1,6 +1,7 @@
 package mohitbadwal.rxconnect;
 
 import android.app.Activity;
+import android.util.Log;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -59,6 +60,9 @@ public class RxConnect {
     }
     private void tempExecutor(final String newHelper1, final String url, final int method)
     {
+        Log.d("newhelper1",newHelper1);
+        Log.d("url temp", url);
+        Log.d("method",""+method);
         final Observable<String> observable=AsyncSubject.create(new Observable.OnSubscribe<String>() {
             @Override
             public void call(Subscriber<? super String> subscriber) {
