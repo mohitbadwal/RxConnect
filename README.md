@@ -3,7 +3,7 @@ An Android Library to POST JSON and normal GET/POST using Rxjava.
 
 Add this line to your <b>dependencies</b> in your apps <b>build.gradle</b>
 
-<code>compile 'mohitbadwal.rxconnect:rxconnect:1.0.32'</code>
+<code>compile 'mohitbadwal.rxconnect:rxconnect:1.0.33'</code>
 
 # Usage
 Make new <b>RxConnect</b> object
@@ -19,11 +19,11 @@ rxConnect.setCachingEnabled(false);
 ```
   Set Parameter to send
 
-  ```java
+```java
 rxConnect.setParam("phone","9999999999");
 // setParam(keys,values)
 rxConnect.setParam("password","enteredpassword");
-  ```
+```
   Use <b>execute</b> method to perform operation
 ```java
       //all override methods run on ui thread
