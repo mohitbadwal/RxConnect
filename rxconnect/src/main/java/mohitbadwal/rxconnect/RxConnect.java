@@ -43,12 +43,18 @@ public class RxConnect {
     public static final String GET="3";
     private boolean CACHING_ENABLED=true;
     private String helper="";
+    List<String> title,message;
     public void setParam(String subject,String answer)
     {
         this.subject.add(subject);
        this.answer.add(answer);
         if (isCachingEnabled())
         helper=helper+subject+answer;
+    }
+    public void setHeader(String title,String message)
+    {
+        this.title.add(title);
+        this.message.add(message);
     }
     public boolean isCachingEnabled()
     {
@@ -403,7 +409,13 @@ public class RxConnect {
 
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
-
+            if(title.size()!=0)
+            {
+                for (int i=0;i<title.size();i++)
+                {
+                    httpPost.setHeader(title.get(i),message.get(i));
+                }
+            }
             HttpResponse httpResponse = httpclient.execute(httpPost);
 
             inputStream = httpResponse.getEntity().getContent();
@@ -433,6 +445,8 @@ public class RxConnect {
     {   this.context=context;
         subject=new ArrayList<>();
         answer=new ArrayList<>();
+        title=new ArrayList<>();
+        message=new ArrayList<>();
         resultCache=new ResultCache();
     }
 public interface RxResultHelper
