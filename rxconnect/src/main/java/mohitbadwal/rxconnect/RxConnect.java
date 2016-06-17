@@ -10,6 +10,7 @@ import org.apache.http.client.HttpClient;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
@@ -41,6 +42,7 @@ public class RxConnect {
     public static final String JSON_POST="1";
     public static final String POST="2";
     public static final String GET="3";
+    public static final String PATCH="4";
     private boolean CACHING_ENABLED=true;
     private String helper="";
     List<String> title,message;
@@ -86,6 +88,10 @@ public class RxConnect {
                         {
                             s=normalGET(url);
                         }
+                        else if (method==4)
+                        {
+                            s=PATCH(url);
+                        }
                         else
                         {
                             s=getLinkContent(url);
@@ -118,6 +124,7 @@ public class RxConnect {
         };
         observable.subscribeOn(Schedulers.newThread())
                 .subscribe(subscriber);
+
     }
     public void execute(final String url, final String method, final RxResultHelper RxResultHelper)
     {
@@ -166,6 +173,18 @@ public class RxConnect {
                                 tempExecutor(newHelper,url,3);
                             }
                         }
+                        else if(method.contentEquals("4")) {
+                            newHelper=url+helper+"patch";
+                            cachedResult=resultCache.getResultCache(newHelper);
+                            if(cachedResult==null) {
+                                s = PATCH(url);
+                                resultCache.putResultToCache(newHelper,s);
+                            }
+                            else  {
+                                s = cachedResult;
+                                tempExecutor(newHelper,url,4);
+                            }
+                        }
                         else {
                             throw new ParamsException();
                         }
@@ -178,6 +197,8 @@ public class RxConnect {
                             s=normalPOST(url);
                         else if (method.contentEquals("3"))
                             s=normalGET(url);
+                        else if (method.contentEquals("4"))
+                            s=PATCH(url);
                         else {
                             throw new ParamsException();
                         }
@@ -424,6 +445,57 @@ public class RxConnect {
                 result = streamConverter(inputStream);
             else
                 result = "Empty Stream";
+
+
+
+        return result;
+    }
+    private String PATCH(String url) throws Exception {
+        InputStream inputStream = null;
+        String result = "";
+
+
+        HttpClient httpclient = new DefaultHttpClient();
+
+        HttpPatch httpPost = new HttpPatch(url);
+        String json = "";
+        JSONObject jsonObject = new JSONObject();
+        if(!(subject.size()>0))
+        {
+            throw new ParamsException();
+        }
+
+        for (int i=0;i<subject.size();i++) {
+
+
+            jsonObject.accumulate(subject.get(i), answer.get(i));
+
+
+        }
+
+        json = jsonObject.toString();
+
+        StringEntity se = new StringEntity(json);
+
+        httpPost.setEntity(se);
+
+        httpPost.setHeader("Accept", "application/json");
+        httpPost.setHeader("Content-type", "application/json");
+        if(title.size()!=0)
+        {
+            for (int i=0;i<title.size();i++)
+            {
+                httpPost.setHeader(title.get(i),message.get(i));
+            }
+        }
+        HttpResponse httpResponse = httpclient.execute(httpPost);
+
+        inputStream = httpResponse.getEntity().getContent();
+
+        if(inputStream != null)
+            result = streamConverter(inputStream);
+        else
+            result = "Empty Stream";
 
 
 
