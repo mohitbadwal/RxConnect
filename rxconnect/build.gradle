@@ -13,7 +13,7 @@ ext {
     siteUrl='https://github.com/mohitbadwal/RxConnect'
     gitUrl='https://github.com/mohitbadwal/RxConnect.git'
 
-    libraryVersion = '1.0.35'
+    libraryVersion = '1.0.36'
 
     developerId = 'mohitbadwal'
     developerName = 'Mohit Badwal'
