@@ -1,6 +1,7 @@
 package mohitbadwal.rxconnect;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
@@ -348,7 +349,15 @@ public class RxConnect {
         String paramString = URLEncodedUtils.format(params, "utf-8");
         url += "?" + paramString;
         HttpGet httpGet = new HttpGet(url);
-
+        httpGet.setHeader("Accept", "application/json");
+        httpGet.setHeader("Content-type", "application/json");
+        if(title.size()!=0)
+        {
+            for (int i=0;i<title.size();i++)
+            {
+                httpGet.setHeader(title.get(i),message.get(i));
+            }
+        }
         HttpResponse httpResponse = httpClient.execute(httpGet);
         HttpEntity httpEntity = httpResponse.getEntity();
         inputStream = httpEntity.getContent();
@@ -385,6 +394,15 @@ public class RxConnect {
 
         }
         httpPost.setEntity(new UrlEncodedFormEntity(params));
+        httpPost.setHeader("Accept", "application/json");
+        httpPost.setHeader("Content-type", "application/json");
+        if(title.size()!=0)
+        {
+            for (int i=0;i<title.size();i++)
+            {
+                httpPost.setHeader(title.get(i),message.get(i));
+            }
+        }
         HttpResponse httpResponse = httpClient.execute(httpPost);
         HttpEntity httpEntity = httpResponse.getEntity();
         inputStream = httpEntity.getContent();
