@@ -49,7 +49,10 @@ public class NetworkQueueOperation {
         for(int j=0;j<e;j++)
         {
             RxConnect r=(RxConnect)rxConnectRequestQueue.poll();
+            if(r.getParamSize())
             r.execute(r.getUrl(),r.getMethod(),r.getRxResultHelper());
+            else
+            r.executeNoParam(r.getUrl(),r.getRxResultHelper());
             rxConnectRequestQueue.remove();
         }
     }

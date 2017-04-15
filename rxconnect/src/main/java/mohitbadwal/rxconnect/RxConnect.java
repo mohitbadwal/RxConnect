@@ -415,6 +415,10 @@ public class RxConnect {
        
     
     }
+    protected boolean getParamSize()
+    {
+        return subject.size() > 0;
+    }
     private String normalPOST(String url) throws Exception {
         InputStream inputStream = null;
         String result = "";
