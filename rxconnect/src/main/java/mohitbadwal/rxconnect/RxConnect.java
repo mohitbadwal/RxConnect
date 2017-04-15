@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.internal.http.multipart.MultipartEntity;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -27,10 +29,13 @@ import java.io.InputStreamReader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import rx.Observable;
 import rx.Subscriber;
 
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.AsyncSubject;
 
@@ -38,13 +43,15 @@ import rx.subjects.AsyncSubject;
  * Created by MohitBadwal on 16-May-16.
  */
 public class RxConnect {
-    private Activity context;
+    private Context context;
     List<String> subject;List<String> answer;
     public static final String JSON_POST="1";
     public static final String POST="2";
     public static final String GET="3";
+    RxConnect rxConnect;
     public static final String PATCH="4";
     private boolean CACHING_ENABLED=true;
+    private boolean addToQueue=true;
     private String helper="";
     List<String> title,message;
     public void setParam(String subject,String answer)
@@ -59,6 +66,15 @@ public class RxConnect {
         this.title.add(title);
         this.message.add(message);
     }
+
+    public boolean isAddToQueue() {
+        return addToQueue;
+    }
+
+    public void setAddToQueue(boolean addToQueue) {
+        this.addToQueue = addToQueue;
+    }
+
     public boolean isCachingEnabled()
     {
         return CACHING_ENABLED;
@@ -114,7 +130,8 @@ public class RxConnect {
 
             @Override
             public void onError(final Throwable e) {
-
+                if(isAddToQueue())
+                networkQueueOperation.addRequest(rxConnect);
                 e.printStackTrace();
             }
 
@@ -127,8 +144,36 @@ public class RxConnect {
                 .subscribe(subscriber);
 
     }
+    private String url,method;
+    private RxResultHelper rxResultHelper;
+
+    protected String getUrl() {
+        return url;
+    }
+
+    private void setUrl(String url) {
+        this.url = url;
+    }
+
+    protected String getMethod() {
+        return method;
+    }
+
+    private void setMethod(String method) {
+        this.method = method;
+    }
+
+    protected RxResultHelper getRxResultHelper() {
+        return rxResultHelper;
+    }
+
+    private void setRxResultHelper(RxResultHelper rxResultHelper) {
+        this.rxResultHelper = rxResultHelper;
+    }
+
     public void execute(final String url, final String method, final RxResultHelper RxResultHelper)
     {
+
         Observable<String> observable= AsyncSubject.create(new Observable.OnSubscribe<String>() {
             @Override
             public void call(Subscriber<? super String> subscriber) {
@@ -220,30 +265,28 @@ public class RxConnect {
 
             @Override
             public void onError(final Throwable e) {
-                context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        RxResultHelper.onError(e);
-                    }
-                });
+                if(isAddToQueue())
+                    networkQueueOperation.addRequest(rxConnect);
+                RxResultHelper.onError(e);
+
+
 
             }
 
             @Override
             public void onNext(final String s) {
-                context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
                         if(!s.contentEquals("Empty Stream"))
                             RxResultHelper.onResult(s);
                         else
                             RxResultHelper.onNoResult();
-                    }
-                });
+
             }
         };
-        observable.subscribeOn(Schedulers.newThread())
+        observable.subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
+        setUrl(url);
+        setMethod(method);
+        setRxResultHelper(RxResultHelper);
     }
 
     public void executeNoParam(final String url,final RxResultHelper RxResultHelper)
@@ -279,30 +322,28 @@ public class RxConnect {
 
             @Override
             public void onError(final Throwable e) {
-                context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        RxResultHelper.onError(e);
-                    }
-                });
+                if(isAddToQueue())
+                    networkQueueOperation.addRequest(rxConnect);
+                RxResultHelper.onError(e);
+
 
             }
 
             @Override
             public void onNext(final String s) {
-                context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+
                         if(!s.contentEquals("Empty Stream"))
                             RxResultHelper.onResult(s);
                         else
                             RxResultHelper.onNoResult();
-                    }
-                });
+
             }
         };
-        observable.subscribeOn(Schedulers.newThread())
+        observable.subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
+        setUrl(url);
+        setMethod(RxConnect.GET);
+        setRxResultHelper(RxResultHelper);
     }
     private String getLinkContent(String url) throws Exception {
         InputStream inputStream = null;
@@ -531,13 +572,35 @@ public class RxConnect {
 
     }
     ResultCache resultCache;
+    NetworkQueueOperation networkQueueOperation;
     public RxConnect(Activity context)
+    {   this.context=context;
+        subject=new ArrayList<>();
+        Queue<RxConnect> queue=new PriorityQueue<>();
+        answer=new ArrayList<>();
+        title=new ArrayList<>();
+        message=new ArrayList<>();
+        resultCache=new ResultCache();
+        networkQueueOperation=new NetworkQueueOperation(context);
+        rxConnect=this;
+        if(rxConnect==null)
+        {
+            Log.d("qwerty","null rxconnect");
+        }
+    }
+    public RxConnect(Context context)
     {   this.context=context;
         subject=new ArrayList<>();
         answer=new ArrayList<>();
         title=new ArrayList<>();
         message=new ArrayList<>();
         resultCache=new ResultCache();
+        networkQueueOperation=new NetworkQueueOperation(context);
+        rxConnect=this;
+        if(rxConnect==null)
+        {
+            Log.d("qwerty","null rxconnect");
+        }
     }
 public interface RxResultHelper
 {
