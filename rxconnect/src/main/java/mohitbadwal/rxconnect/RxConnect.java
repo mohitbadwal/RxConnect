@@ -390,8 +390,8 @@ public class RxConnect {
         String paramString = URLEncodedUtils.format(params, "utf-8");
         url += "?" + paramString;
         HttpGet httpGet = new HttpGet(url);
-        httpGet.setHeader("Accept", "application/json");
-        httpGet.setHeader("Content-type", "application/json");
+ //       httpGet.setHeader("Accept", "application/json");
+ //       httpGet.setHeader("Content-type", "application/json");
         if(title.size()!=0)
         {
             for (int i=0;i<title.size();i++)
@@ -431,12 +431,13 @@ public class RxConnect {
         for (int i=0;i<subject.size();i++) {
 
             params.add(new BasicNameValuePair(subject.get(i),answer.get(i)));
+            Log.d("qwerty","post" + answer.get(i));
 
 
         }
         httpPost.setEntity(new UrlEncodedFormEntity(params));
-        httpPost.setHeader("Accept", "application/json");
-        httpPost.setHeader("Content-type", "application/json");
+    //    httpPost.setHeader("Accept", "application/json");
+     //   httpPost.setHeader("Content-type", "application/json");
         if(title.size()!=0)
         {
             for (int i=0;i<title.size();i++)
