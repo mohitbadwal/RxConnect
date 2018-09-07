@@ -3,7 +3,7 @@ An Android Library to POST JSON and normal GET/POST using Rxjava.
 
 Add this line to your <b>dependencies</b> in your apps <b>build.gradle</b>
 
-<code>compile 'mohitbadwal.rxconnect:rxconnect:1.0.41'</code>
+<code>compile 'mohitbadwal.rxconnect:rxconnect:1.0.42'</code>
 
 # Usage
 Make new <b>RxConnect</b> object
