@@ -1,1 +1,1 @@
-include ':app', ':rxconnect'
+include ':rxconnect'
